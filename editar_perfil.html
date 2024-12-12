@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Perfil</title>
+    <link rel="stylesheet" href="editar_perfil.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- Cabeçalho -->
+    <header>
+      <nav>
+        <img src="imagens/l.png" width="80px" />
+        <h1>Editar Perfil</h1>
+        <ul class="nav-links">
+          <li><a href="index.html">UNEB STORE</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <div class="edit-profile-container">
+      <h2>Atualizar Informações</h2>
+      <form id="editar-perfil" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="foto">Foto de Perfil</label>
+          <input type="file" name="foto" id="foto" accept="image/*" />
+        </div>
+
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" name="nome" id="nome" placeholder="Nome Atualizado" />
+        </div>
+
+        <div class="form-group">
+          <label for="telefone">Telefone</label>
+          <input
+            type="text"
+            name="telefone"
+            id="telefone"
+            placeholder="Telefone Atualizado"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="senha">Nova Senha</label>
+          <input
+            type="password"
+            name="senha"
+            id="senha"
+            placeholder="Digite uma nova senha"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save">Salvar Alterações</button>
+          <a href="perfil.html" class="btn-cancel">Cancelar</a>
+        </div>
+      </form>
+    </div>
+
+    <footer>
+      <p>&copy; 2024 UNEB Store </p>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Por favor, faça login primeiro.");
+          window.location.href = "login.html";
+          return;
+        }
+
+        
+        try {
+          const response = await fetch("http://localhost:3000/usuario/perfil", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (!response.ok) throw new Error("Erro ao carregar perfil.");
+
+          const perfil = await response.json();
+          document.getElementById("nome").value = perfil.nome || "";
+          document.getElementById("telefone").value = perfil.telefone || "";
+        } catch (error) {
+          alert("Erro ao carregar perfil.");
+        }
+
+     
+        document.getElementById("editar-perfil").onsubmit = async (event) => {
+          event.preventDefault();
+          const formData = new FormData(event.target);
+
+          const response = await fetch("http://localhost:3000/usuario/atualizar", {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          });
+
+          if (response.ok) {
+            alert("Perfil atualizado com sucesso!");
+            window.location.href = "perfil.html";
+          } else {
+            alert("Erro ao atualizar perfil.");
+          }
+        };
+      });
+    </script>
+  </body>
+</html>
