@@ -1,0 +1,121 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+body {
+  background: url(imagens/UNEB\ Store\ vermelho\ -\ Copia.png);
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  width: 900px;
+  background: transparent;
+  background-color: #f0f2f500;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(11, 11, 11, 0.418);
+  overflow: hidden;
+}
+
+
+.login-section,
+.signup-section {
+  padding: 40px;
+  width: 50%;
+  border-bottom: #1c0583;
+}
+
+.login-section {
+  background-color: #fff;
+}
+.signup-section h2{
+color:#f0f2f5
+}
+.signup-section {
+  background-color: #1877f2;
+  
+}
+
+
+h2 {
+  margin-bottom: 20px;
+  color: #2709ec;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #1c0583;
+}
+
+.input-group input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 15px;
+  width: 100%;
+  font-size: 16px;
+}
+
+
+.login-btn,
+.signup-btn {
+  background-color: #e83232;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-btn:hover,
+.signup-btn:hover {
+  background-color: #165aaf;
+}
+
+
+.input-group.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 20px; 
+}
+
+.radio-group label {
+  margin-right: 10px;
+}
+
+.radio-group input[type="radio"] {
+  margin-right: 5px;
+}
+
+h6{
+  margin:3PX;
+  font-size: 15px;
+  margin-bottom: 5px;
+  color: #f0f2f5;
+
+}
