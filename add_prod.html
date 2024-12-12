@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anunciar Produto</title>
+    <link rel="stylesheet" href="add_prod.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-box">
+        <h1 id="form-title">Anunciar Produto</h1>
+        <form id="anuncio-form" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="nome">Nome do Produto:</label>
+            <input type="text" id="nome" name="nome" required />
+          </div>
+
+          <div class="form-group">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" required>
+              <option value="" disabled selected>Escolha uma categoria</option>
+              <option value="eletronicos">Eletrônicos</option>
+              <option value="imoveis">Imóveis</option>
+              <option value="moda">Moda</option>
+              <option value="servicos">Serviços</option>
+              <option value="alimentos">Alimentos</option>
+              <option value="moveis">Móveis</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Condição:</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="condicao" value="novo" required />
+                Novo
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="condicao" value="usado" required />
+                Usado
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fotos">Fotos do Produto:</label>
+            <input
+              type="file"
+              id="fotos"
+              name="fotos"
+              accept="image/*"
+              multiple
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="preco">Preço (R$):</label>
+            <input type="number" id="preco" name="preco" step="0.01" required />
+          </div>
+
+          <div class="form-group">
+            <label for="descricao">Descrição:</label>
+            <textarea id="descricao" name="descricao" rows="4" required></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="submit-btn">Anunciar Produto</button>
+            <button type="button" id="cancel-btn">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(window.location.search);
+        const anuncioId = params.get("id");
+        const formTitle = document.getElementById("form-title");
+        const submitBtn = document.getElementById("submit-btn");
+        const form = document.getElementById("anuncio-form");
+
+      
+        document.getElementById("cancel-btn").addEventListener("click", () => {
+          window.history.back(); 
+        });
+
+        if (anuncioId) {
+          formTitle.textContent = "Editar Produto";
+          submitBtn.textContent = "Salvar Alterações";
+
+          try {
+            const response = await fetch(`http://localhost:3000/produtos/${anuncioId}`);
+            if (!response.ok) throw new Error("Erro ao buscar informações do produto");
+
+            const anuncio = await response.json();
+            document.getElementById("nome").value = anuncio.nome;
+            document.getElementById("categoria").value = anuncio.categoria;
+            document.querySelector(`input[name="condicao"][value="${anuncio.condicao}"]`).checked = true;
+            document.getElementById("preco").value = anuncio.preco;
+            document.getElementById("descricao").value = anuncio.descricao;
+
+          } catch (error) {
+            alert("Erro ao carregar o anúncio para edição");
+          }
+
+          form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+              alert("Por favor, faça login primeiro.");
+              return;
+            }
+
+            const formData = new FormData(form);
+            try {
+              const response = await fetch(`http://localhost:3000/produtos/${anuncioId}`, {
+                method: "PUT",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+              });
+
+              if (response.ok) {
+                alert("Produto atualizado com sucesso!");
+                window.location.href = "my_anucios.html";
+              } else {
+                alert("Erro ao salvar alterações.");
+              }
+            } catch (error) {
+              alert("Erro na conexão com o servidor.");
+            }
+          });
+        } else {
+          form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+              alert("Por favor, faça login primeiro.");
+              return;
+            }
+
+            const formData = new FormData(form);
+            try {
+              const response = await fetch("http://localhost:3000/produtos/adicionar", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
+              });
+
+              if (response.ok) {
+                alert("Produto anunciado com sucesso!");
+                window.location.href = "my_anucios.html";
+              } else {
+                alert("Erro ao anunciar o produto.");
+              }
+            } catch (error) {
+              alert("Erro na conexão com o servidor.");
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

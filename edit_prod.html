@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Anúncio</title>
+    <link rel="stylesheet" href="add_prod.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-box">
+        <h1>Editar Produto</h1>
+        <form id="edit-form" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="nome">Nome do Produto:</label>
+            <input type="text" id="nome" name="nome" required />
+          </div>
+
+          <div class="form-group">
+            <label for="categoria">Categoria:</label>
+            <select id="categoria" name="categoria" required>
+              <option value="" disabled selected>Escolha uma categoria</option>
+              <option value="eletronicos">Eletrônicos</option>
+              <option value="imoveis">Imóveis</option>
+              <option value="moda">Moda</option>
+              <option value="servicos">Serviços</option>
+              <option value="alimentos">Alimentos</option>
+              <option value="moveis">Móveis</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Condição:</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="condicao" value="novo" required />
+                Novo
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="condicao" value="usado" required />
+                Usado
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fotos">Alterar Fotos do Produto:</label>
+            <input
+              type="file"
+              id="fotos"
+              name="fotos"
+              accept="image/*"
+              multiple
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="preco">Preço (R$):</label>
+            <input type="number" id="preco" name="preco" step="0.01" required />
+          </div>
+
+          <div class="form-group">
+            <label for="descricao">Descrição:</label>
+            <textarea id="descricao" name="descricao" rows="4" required></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="save-btn">Salvar Alterações</button>
+            <a href="my_anucios.html"><button type="button" id="cancel-btn">Cancelar</button></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const params = new URLSearchParams(window.location.search);
+        const anuncioId = params.get("id");
+    
+        if (!anuncioId) {
+          alert("ID do anúncio não encontrado!");
+          window.location.href = "my_anucios.html";
+          return;
+        }
+    
+        const form = document.getElementById("edit-form");
+    
+      
+        try {
+          const response = await fetch(`http://localhost:3000/produtos/${anuncioId}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+    
+          if (!response.ok) throw new Error("Erro ao buscar informações do produto.");
+    
+          const anuncio = await response.json();
+          document.getElementById("nome").value = anuncio.nome;
+          document.getElementById("categoria").value = anuncio.categoria;
+          document.querySelector(`input[name="condicao"][value="${anuncio.condicao}"]`).checked = true;
+          document.getElementById("preco").value = anuncio.preco;
+          document.getElementById("descricao").value = anuncio.descricao;
+        } catch (error) {
+          alert("Erro ao carregar o anúncio para edição.");
+        }
+    
+   
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+    
+          try {
+            const response = await fetch(`http://localhost:3000/produtos/${anuncioId}`, {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+              body: formData,
+            });
+    
+            if (response.ok) {
+              alert("Anúncio atualizado com sucesso!");
+              window.location.href = "my_anucios.html";
+            } else {
+              alert("Erro ao salvar alterações.");
+            }
+          } catch (error) {
+            console.error("Erro na conexão com o servidor:", error);
+          }
+        });
+      });
+    </script>
+    
+      
+  </body>
+</html>
