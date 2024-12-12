@@ -1,0 +1,92 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: url('imagens/UNEB\ Store\ vermelho.png' ) no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    color: white;
+    font-size: 18px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0); 
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0);
+}
+
+
+header h1 {
+    font-size: 3.5rem;
+    color: #fff; 
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+
+header p {
+    font-size: 1.2rem;
+    margin-top: 10px;
+    line-height: 1.6;
+    color: #fff;
+}
+
+
+.cta button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    background-color: #1c3d73; 
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin-top: 30px;
+}
+
+.cta button:hover {
+    background-color: #9e1b32;
+    transform: scale(1.05); 
+}
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    header p {
+        font-size: 1rem;
+    }
+
+    .cta button {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+}
