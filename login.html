@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UNEB Store - Login e Cadastro</title>
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Seção de Login -->
+      <div class="login-section">
+        <h2>Login</h2>
+        <form action="/auth/login" method="POST" class="login-form">
+          <div class="input-group">
+            <label for="login-matricula">Matrícula:</label>
+            <input type="number" id="login-matricula" name="matricula" required />
+          </div>
+          <div class="input-group">
+            <label for="login-senha">Senha:</label>
+            <input type="password" id="login-senha" name="senha" required />
+          </div>
+          <button type="submit" class="login-btn">Entrar</button>
+        </form>
+        <img src="imagens/UNEB Store.png" alt="" width="300px">
+      </div>
+
+      <!-- Seção de Cadastro -->
+      <div class="signup-section">
+        <h2>Criar Conta</h2>
+        <form action="/auth/cadastro" method="POST" class="signup-form">
+          <div class="input-group">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required />
+          </div>
+          <div class="input-group">
+            <label for="cadastro-matricula">Matrícula:</label>
+            <input type="number" id="cadastro-matricula" name="matricula" required />
+          </div>
+          <div class="input-group">
+           
+            <label for="departamento">Departamento:</label>
+            <select id="departamento" name="departamento" required>
+              <option value="DCET-II">DCET-II</option>
+              <option value="DEDC-II">DEDC-II</option>
+              <option value="DLLARTS-II">DLLARTS-II</option>
+              <option value="funcionarios">FUNCIONÁRIO POLIVALENTE</option>
+            </select>
+          </div>
+
+          <!-- Tipo de usuário -->
+          <div class="input-group radio-group">
+            <label>Tipo de Usuário:</label>
+            <input type="radio" id="aluno" name="tipo-usuario" value="aluno" onclick="mostrarCampos()" required />
+            <label for="aluno">Aluno</label>
+
+            <input type="radio" id="funcionario" name="tipo-usuario" value="funcionario" onclick="mostrarCampos()" required />
+            <label for="funcionario">Funcionário</label>
+          </div>
+
+          <!-- Campos adicionais para aluno -->
+          <div class="input-group" id="curso-div" style="display: none;">
+            <label for="curso">Curso:</label>
+            <input type="text" id="curso" name="curso" />
+          </div>
+
+          <!-- Campos adicionais para funcionário -->
+          <div class="input-group" id="funcao-div" style="display: none;">
+            <label for="funcao">Função:</label>
+            <select id="funcao" name="funcao">
+              <option value="professor">Professor</option>
+              <option value="tecnico">Técnico</option>
+              <option value="prestador-servico">Prestador de Serviço</option>
+              <option value="estagiario">Estagiário</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="telefone">Telefone:</label>
+            <input type="tel" id="telefone" name="telefone" required />
+          </div>
+          <div class="input-group">
+            <label for="signup-senha">Senha:</label>
+            <input type="password" id="signup-senha" name="senha" required />
+          </div>
+          <button type="submit" class="signup-btn">Cadastrar-se</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Exibe ou oculta os campos adicionais com base no tipo de usuário
+      function mostrarCampos() {
+        const tipoUsuario = document.querySelector('input[name="tipo-usuario"]:checked').value;
+        const cursoDiv = document.getElementById("curso-div");
+        const funcaoDiv = document.getElementById("funcao-div");
+
+        if (tipoUsuario === "aluno") {
+          cursoDiv.style.display = "block";
+          funcaoDiv.style.display = "none";
+        } else if (tipoUsuario === "funcionario") {
+          cursoDiv.style.display = "none";
+          funcaoDiv.style.display = "block";
+        }
+      }
+
+      // Função para envio do formulário de login
+      document.querySelector(".login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const matricula = document.querySelector("#login-matricula").value;
+        const senha = document.querySelector("#login-senha").value;
+
+        try {
+          const response = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ matricula, senha }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            localStorage.setItem("token", data.token);
+            alert("Login bem-sucedido!");
+            window.location.href = "index.html";
+          } else {
+            alert("Erro no login: " + data.message);
+          }
+        } catch {
+          alert("Erro ao conectar ao servidor.");
+        }
+      });
+
+      // Função para envio do formulário de cadastro
+      document.querySelector(".signup-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const nome = document.querySelector("#nome").value;
+        const matricula = document.querySelector("#cadastro-matricula").value;
+        const telefone = document.querySelector("#telefone").value;
+        const senha = document.querySelector("#signup-senha").value;
+        const tipo_usuario = document.querySelector('input[name="tipo-usuario"]:checked').value;
+        const curso = document.querySelector("#curso").value || null;
+        const funcao = document.querySelector("#funcao").value || null;
+        const departamento = document.querySelector("#departamento").value;
+
+        try {
+          const response = await fetch("http://localhost:3000/auth/cadastro", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nome, matricula, telefone, senha, tipo_usuario, curso, funcao, departamento }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            alert("Cadastro realizado com sucesso!");
+            window.location.href = "login.html";
+          } else {
+            alert("Erro no cadastro: " + data.message);
+          }
+        } catch {
+          alert("Erro ao conectar ao servidor.");
+        }
+      });
+    </script>
+  </body>
+</html>
