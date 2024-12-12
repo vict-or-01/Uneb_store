@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil do Usuário</title>
+  <link rel="stylesheet" href="perfil.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header>
+    <nav>
+      <img src="imagens/l.png" width="100px" alt="Logo UNEB Store" />
+      <h1>Perfil do Usuário</h1>
+      <ul class="nav-links">
+        <li><a href="index.html">UNEB STORE</a></li>
+        <li><a href="my_anucios.html">Meus Anúncios</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <div class="profile-container">
+    <!-- Informações do Perfil -->
+    <div class="profile-info">
+      <h2>Informações do Usuário</h2>
+      <div class="profile-details">
+        <img
+          id="foto-perfil"
+          src="default-user.jpg"
+          alt="Foto de Perfil"
+          width="150px"
+        />
+        <p><strong>Nome:</strong> <span id="nome-usuario">Carregando...</span></p>
+        <p><strong>Matrícula:</strong> <span id="matricula-usuario">Carregando...</span></p>
+        <p><strong>Telefone:</strong> <span id="telefone-usuario">Carregando...</span></p>
+        <p><strong>Produtos Anunciados:</strong> <span id="qtd_an">Carregando...</span></p>
+        <button class="logout-btn" id="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+        <a href="editar_perfil.html" class="edit-btn">Editar Perfil</a>
+      </div>
+    </div>
+
+    <!-- Seção de Chats -->
+    <div class="chat-section">
+      <h2>Chats</h2>
+      <div id="chats-completos" class="chats-container"></div>
+    </div>
+  </div>
+
+  <!-- Contêiner do Chat -->
+  <div id="chat-container" style="display: none;" class="chat-popup">
+    <div id="chat-header">
+      <img id="vendedor-foto" src="default-user.jpg" alt="Foto do vendedor" class="chat-profile-pic" />
+      <h4 id="vendedor-nome"></h4>
+      <button id="fechar-chat">X</button>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div id="chat-input-area">
+      <textarea id="chat-input" placeholder="Digite sua mensagem..."></textarea>
+      <button id="enviar-mensagem">Enviar</button>
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <footer>
+    <p>&copy; 2024 - Perfil.</p>
+    <ul class="footer-links">
+      <li>
+        <strong><a href="index.html">UNEB STORE</a></strong>
+      </li>
+    </ul>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Por favor, faça login primeiro.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      const carregarDados = async (url) => {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error(`Erro ao carregar dados de ${url}.`);
+        return response.json();
+      };
+
+      const carregarPerfil = async () => {
+        try {
+          const perfil = await carregarDados("http://localhost:3000/usuario/perfil");
+          document.getElementById("nome-usuario").innerText = perfil.nome || "Não informado";
+          document.getElementById("matricula-usuario").innerText = perfil.matricula || "Não informado";
+          document.getElementById("telefone-usuario").innerText = perfil.telefone || "Não informado";
+          document.getElementById("foto-perfil").src = perfil.foto || "default-user.jpg";
+          document.getElementById("qtd_an").innerText = perfil.produtos_anunciados || "Sem Anuncios ";
+        } catch (error) {
+          alert("Erro ao carregar perfil: " + error.message);
+        }
+      };
+
+      const carregarUsuariosComProdutos = async () => {
+        try {
+          const usuarios = await carregarDados("http://localhost:3000/chats/usuarios-e-produtos");
+          const container = document.getElementById("chats-completos");
+
+          container.innerHTML = "";
+
+          if (usuarios.length === 0) {
+            container.innerHTML = "<p>Nenhum usuário encontrado.</p>";
+            return;
+          }
+
+          usuarios.forEach((usuario) => {
+            const item = `
+              <div class="usuario-detalhe">
+                <img src="${usuario.usuarioFoto || 'default-user.jpg'}" alt="${usuario.usuarioNome}" class="usuario-foto" />
+                <div>
+                  <h4>${usuario.usuarioNome}</h4>
+                  <button class="abrir-chat-btn" data-usuario-id="${usuario.usuarioId}">Abrir Chat</button>
+                </div>
+              </div>
+              <hr>
+            `;
+            container.innerHTML += item;
+          });
+        } catch (error) {
+          alert("Erro ao carregar usuários: " + error.message);
+        }
+      };
+
+      document.body.addEventListener("click", (event) => {
+        if (event.target.classList.contains("abrir-chat-btn")) {
+          const usuarioId = event.target.getAttribute("data-usuario-id");
+          if (usuarioId) {
+            abrirChat(usuarioId);
+          } else {
+            console.error("ID do usuário não encontrado!");
+          }
+        }
+      });
+
+      const abrirChat = async (vendedorId) => {
+        try {
+          const vendedor = await carregarDados(`http://localhost:3000/chat/vendedor/${vendedorId}`);
+          document.getElementById("vendedor-nome").innerText = vendedor.nome;
+          document.getElementById("vendedor-foto").src = vendedor.foto || "default-user.jpg";
+          document.getElementById("chat-container").style.display = "block";
+
+          carregarMensagens(vendedorId);
+          document.getElementById("enviar-mensagem").onclick = () => enviarMensagem(vendedorId);
+          document.getElementById("fechar-chat").onclick = fecharChat;
+        } catch (error) {
+          alert("Erro ao abrir o chat: " + error.message);
+        }
+      };
+
+      const carregarMensagens = async (vendedorId) => {
+        try {
+          const mensagens = await carregarDados(`http://localhost:3000/chat/mensagens/${vendedorId}`);
+          const chatMessages = document.getElementById("chat-messages");
+          chatMessages.innerHTML = mensagens
+            .map((msg) => `<p><strong>${msg.sender_nome}:</strong> ${msg.message}</p>`)
+            .join("");
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        } catch (error) {
+          alert("Erro ao carregar mensagens: " + error.message);
+        }
+      };
+
+      const enviarMensagem = async (vendedorId) => {
+        const mensagem = document.getElementById("chat-input").value;
+        try {
+          await fetch("http://localhost:3000/chat/enviar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ receiverId: vendedorId, message: mensagem }),
+          });
+          document.getElementById("chat-input").value = "";
+          carregarMensagens(vendedorId);
+        } catch (error) {
+          alert("Erro ao enviar mensagem: " + error.message);
+        }
+      };
+
+      const fecharChat = () => {
+        document.getElementById("chat-container").style.display = "none";
+      };
+
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        alert("Você saiu da conta!");
+        window.location.href = "login.html";
+      });
+
+      
+
+      await carregarPerfil();
+      await carregarUsuariosComProdutos();
+    });
+  </script>
+</body>
+</html>

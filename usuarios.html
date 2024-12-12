@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Usuários</title>
+    <link rel="stylesheet" href="usuarios.css">
+</head>
+<body>
+    <header class="header">
+        <h1>Lista de Usuários Cadastrados</h1>
+    </header>
+
+    <main class="main-content">
+        <div id="userList" class="user-list">
+         
+        </div>
+        <button class="back-button" onclick="voltarPagina()">Voltar</button>
+    </main>
+    <!-- Rodapé -->
+    <footer>
+        <p>&copy; 2024 - Usuários. UNEB STORE</p>
+      </footer>
+
+    <script>
+        // Função para voltar à página anterior
+        function voltarPagina() {
+            window.history.back();
+        }
+
+        // Função para carregar os usuários e seus produtos via fetch
+        async function carregarUsuarios() {
+            try {
+                const response = await fetch('http://localhost:3000/api/usuarios');
+                if (!response.ok) throw new Error("Erro ao buscar usuários.");
+
+                const usuarios = await response.json();
+                const userList = document.getElementById('userList');
+                userList.innerHTML = ''; // Limpa antes de adicionar
+
+                usuarios.forEach(user => {
+                    const userCard = document.createElement('div');
+                    userCard.classList.add('user-card');
+                    userCard.innerHTML = `
+                        <img src="${user.foto || 'imagens/default-user.png'}" alt="Foto de ${user.nome}" class="user-photo">
+                        <h3>${user.nome}</h3>
+                        <p><strong>Telefone:</strong> ${user.telefone}</p>
+                        <p><strong>Curso:</strong> ${user.curso || 'N/A'}</p>
+                        <p><strong>Departamento:</strong> ${user.departamento || 'N/A'}</p>
+                        <p><strong>Produtos Anunciados:</strong> ${user.produtos_anunciados}</p>
+                        <p><strong>Categorias:</strong> ${user.categorias || 'Nenhuma'}</p>
+                    `;
+                    userList.appendChild(userCard);
+                });
+            } catch (error) {
+                console.error("Erro ao carregar usuários:", error);
+            }
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', carregarUsuarios);
+    </script>
+</body>
+</html>
