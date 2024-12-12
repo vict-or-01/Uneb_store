@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UNEB Store</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body>
+    <div class="padding-10">
+      <header class="cabecalho">
+        <div>
+          <div class="itens">
+            <img src="imagens/l.png" alt="Logo UNEB Store" width="120px" />
+              <div class="itens">
+              <a href="usuarios.html"><i class="bi bi-person-workspace"></i> usuários</a>
+              </div>
+          </div>
+          
+        
+        </div>
+
+        <div class="cabecalho-button">
+          <div class="itens">
+            <img src="imagens/logo-grande.png" alt="" width="80px" />
+          </div>
+          <div class="itens">
+            <select class="selecionar-pesquisa" name="" id="">
+              <option value="TODOS">TODOS</option>
+              <option value="DCET-II">DCET-II</option>
+              <option value="DEDC-II">DEDC-II</option>
+              <option value="DLLARTS-II">DLLARTS-II</option>
+              <option value="funcionarios">FUNCIONARIO</option>
+            </select>
+          </div>
+
+          <div class="itens">
+            <input
+              class="selecionar-pesquisa search"
+              type="search"
+              name=""
+              id="buscar"
+              placeholder="Buscar Produto..."
+              oninput="buscarProdutos(this.value)"
+            />
+            <i class="bi bi-search"></i>
+          </div>
+          <div id="resultados-busca" class="resultados-container"></div>
+
+          <div class="itens">
+            <a href="my_anucios.html"><i class="bi bi-grid"></i></a>
+            <a href="perfil.html"><i class="bi bi-person-circle"></i></a>
+            <a href="add_prod.html">
+              <button class="btn-anunciar">
+                <i class="bi bi-plus"> Anunciar</i>
+              </button>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <div class="barra-inf-cabecalho">
+  <div>
+    <ul class="barra-de-navegação-menu">
+      <li class="txt-bold">Categorias <i class="bi bi-chevron-down"></i></li>
+      <li data-category="Eletroeletrônicos">Eletroeletrônicos</li>
+      <li data-category="Moda">Moda</li>
+      <li data-category="Alimentos">Alimentos</li>
+      <li data-category="Móveis">Móveis</li>
+      <li data-category="Serviços">Serviços</li>
+      <li data-category="Imóveis">Imóveis</li>
+      <li data-category="Outros">Outros</li>
+      <li data-category="todos">Todos</li>
+    </ul>
+  </div>
+</div>
+
+
+      <main>
+        <div class="cabecalho-ad">
+          <img
+            class="mySlides"
+            src="imagens/slide4.webp"
+            style="width: 1080px"
+            height="380px"
+            alt="Banner principal"
+          />
+        </div>
+        <hr />
+
+        <!-- Contêiner para exibir os anúncios -->
+        <div class="anuncios-container">
+          <!-- Os anúncios serão carregados dinamicamente aqui -->
+        </div>
+      </main>
+    </div>
+
+    <footer class="rodape">
+      <strong><p>Na UNEB, tudo o que você precisa está a um clique de distância!</p></strong>
+      <ul class="footer-links">
+        <li>
+          <strong><a href="#">UNEB STORE</a></strong>
+        </li>
+      </ul>
+      <img src="imagens/white-de-uneb-store.png" alt="" width="50px" />
+    </footer>
+
+    <!-- Contêiner do Chat -->
+    <div id="chat-container" style="display: none;" class="chat-popup">
+      <div id="chat-header">
+        <img id="vendedor-foto" src="default-user.jpg" alt="Foto do vendedor" class="chat-profile-pic" />
+        <h4 id="vendedor-nome"></h4>
+        <!-- Botão para fechar o chat -->
+        <button id="fechar-chat">X</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <!-- As mensagens serão carregadas dinamicamente aqui -->
+      </div>
+      <div id="chat-input-area">
+        <textarea id="chat-input" placeholder="Digite sua mensagem..."></textarea>
+        <button id="enviar-mensagem">Enviar</button>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Faça login primeiro!");
+          window.location.href = "login.html";
+          return;
+        }
+    
+        const container = document.querySelector(".anuncios-container");
+        const dropdown = document.querySelector(".selecionar-pesquisa");
+        const searchInput = document.querySelector("#buscar");
+    
+        // Função para carregar todos os produtos
+        const carregarTodosProdutos = async () => {
+          try {
+            const response = await fetch("http://localhost:3000/produtos/todos", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!response.ok) throw new Error("Erro ao carregar os anúncios");
+    
+            const produtos = await response.json();
+            container.innerHTML = ""; // Limpa os produtos anteriores
+    
+            produtos.forEach((produto) => {
+  const anuncio = document.createElement("div");
+  anuncio.className = "anuncio-card";
+  anuncio.innerHTML = `
+    <img src="${produto.primeiraFoto}" alt="${produto.nome}" class="anuncio-img" />
+    <h3 class="anuncio-titulo">${produto.nome}</h3>
+    <p class="condicao ">${produto.condicao}</p>
+    <p class="anuncio-descricao">${produto.descricao}</p>
+    <p class="anuncio-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+    <p class="reaction-count">
+      Curtidas: <span id="like-count-${produto.id}">${produto.total_likes}</span>,
+      Dislikes: <span id="dislike-count-${produto.id}">${produto.total_dislikes}</span>
+    </p>
+    <div class="anuncio-acoes">
+      <button class="chat-vendedor" data-vendedor-id="${produto.user_id}">
+        <i class="bi bi-chat"></i> Chat com o vendedor
+      </button>
+      <button class="like-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-up"></i>  
+  </button>
+  <button class="dislike-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-down"></i>
+  </button>
+    </div>
+  `;
+  container.appendChild(anuncio);
+});
+
+          } catch (error) {
+            alert("Erro ao carregar os anúncios: " + error.message);
+          }
+        };
+    
+        // Função para registrar reação (like ou dislike)
+        const registrarReacao = async (productId, type) => {
+          try {
+            const token = localStorage.getItem("token");
+            const payload = JSON.parse(atob(token.split(".")[1])); 
+            const userId = payload.id;
+    
+            
+            await fetch("http://localhost:3000/likes", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ userId, productId, type }),
+            });
+    
+            
+            const response = await fetch(`http://localhost:3000/likes/${productId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            const { likes, dislikes } = await response.json();
+            document.getElementById(`like-count-${productId}`).innerText = likes;
+            document.getElementById(`dislike-count-${productId}`).innerText = dislikes;
+          } catch (error) {
+            alert("Erro ao registrar reação: " + error.message);
+          }
+        };
+    
+        
+        document.body.addEventListener("click", (event) => {
+          if (event.target.classList.contains("like-btn") || event.target.classList.contains("dislike-btn")) {
+            const productId = event.target.dataset.productId;
+            const type = event.target.classList.contains("like-btn") ? "like" : "dislike";
+            registrarReacao(productId, type);
+          }
+        });
+    
+        // Função para buscar produtos por nome
+        const buscarProdutos = async (termo) => {
+          try {
+            if (!termo.trim()) {
+              document.getElementById("resultados-busca").innerHTML = "";
+              return;
+            }
+    
+            const response = await fetch(`http://localhost:3000/produtos/buscar?nome=${termo}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            if (!response.ok) throw new Error("Erro ao buscar produtos");
+    
+            const produtos = await response.json();
+            const resultadosBusca = document.getElementById("resultados-busca");
+            resultadosBusca.innerHTML = ""; // Limpa resultados anteriores
+    
+            produtos.forEach((produto) => {
+              const resultadoItem = document.createElement("div");
+              resultadoItem.className = "resultado-item";
+              resultadoItem.innerHTML = `
+                <img src="${produto.primeiraFoto}" alt="${produto.nome}" class="resultado-img" 
+                onerror="this.src='imagens/default.jpg';" />
+                <h4>${produto.nome}</h4>
+                <p>R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+                <button class="chat-vendedor" data-vendedor-id="${produto.user_id}">
+                    <i class="bi bi-chat"></i> Chat com o vendedor
+                  </button>
+              `;
+              resultadosBusca.appendChild(resultadoItem);
+            });
+          } catch (error) {
+            alert("Erro ao buscar produtos: " + error.message);
+          }
+        };
+    
+        // Função para carregar produtos filtrados por departamento
+        const carregarProdutosFiltrados = async (departamento) => {
+          try {
+            const response = await fetch(`http://localhost:3000/produtos/filtrar?departamento=${departamento}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            if (!response.ok) throw new Error("Erro ao carregar produtos filtrados");
+    
+            const produtos = await response.json();
+            container.innerHTML = ""; // Limpa os produtos anteriores
+    
+            produtos.forEach((produto) => {
+              const anuncio = document.createElement("div");
+              anuncio.className = "anuncio-card";
+              anuncio.innerHTML = `
+                <img src="${produto.primeiraFoto}" alt="${produto.nome}" class="anuncio-img" />
+    <h3 class="anuncio-titulo">${produto.nome}</h3>
+    <p class="condicao ">${produto.condicao}</p>
+    <p class="anuncio-descricao">${produto.descricao}</p>
+    <p class="anuncio-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+    <p class="reaction-count">
+      Curtidas: <span id="like-count-${produto.id}">${produto.total_likes}</span>,
+      Dislikes: <span id="dislike-count-${produto.id}">${produto.total_dislikes}</span>
+    </p>
+    <div class="anuncio-acoes">
+      <button class="chat-vendedor" data-vendedor-id="${produto.user_id}">
+        <i class="bi bi-chat"></i> Chat com o vendedor
+      </button>
+      <button class="like-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-up"></i>  
+  </button>
+  <button class="dislike-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-down"></i>
+  </button>
+    </div>
+              `;
+              container.appendChild(anuncio);
+            });
+          } catch (error) {
+            alert("Erro ao carregar produtos filtrados: " + error.message);
+          }
+        };
+
+        // Função para fechar o chat
+const fecharChat = () => {
+  document.getElementById("chat-container").style.display = "none";
+};
+
+// Função para abrir o chat com o vendedor
+const abrirChat = async (vendedorId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+   
+    const vendedorResponse = await fetch(`http://localhost:3000/chat/vendedor/${vendedorId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const vendedor = await vendedorResponse.json();
+
+   
+    document.getElementById("vendedor-nome").innerText = vendedor.nome;
+    document.getElementById("vendedor-foto").src = vendedor.foto || "default-user.jpg";
+
+    
+    document.getElementById("chat-container").style.display = "block";
+
+
+    carregarMensagens(vendedorId);
+
+
+    document.getElementById("enviar-mensagem").onclick = () => enviarMensagem(vendedorId);
+
+
+    document.getElementById("fechar-chat").addEventListener("click", fecharChat);
+  } catch (error) {
+    alert("Erro ao abrir o chat: " + error.message);
+  }
+};
+
+// Função para carregar mensagens do chat
+const carregarMensagens = async (vendedorId) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const response = await fetch(`http://localhost:3000/chat/mensagens/${vendedorId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const mensagens = await response.json();
+    const chatMessages = document.getElementById("chat-messages");
+
+  
+    chatMessages.innerHTML = mensagens
+      .map((msg) => `<p><strong>${msg.sender_nome}:</strong> ${msg.message}</p>`)
+      .join("");
+
+  
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  } catch (error) {
+    alert("Erro ao carregar mensagens: " + error.message);
+  }
+};
+
+// Função para enviar uma mensagem
+const enviarMensagem = async (vendedorId) => {
+  const token = localStorage.getItem("token");
+  const mensagem = document.getElementById("chat-input").value;
+
+  try {
+    await fetch("http://localhost:3000/chat/enviar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ receiverId: vendedorId, message: mensagem }),
+    });
+
+
+    document.getElementById("chat-input").value = "";
+    carregarMensagens(vendedorId);
+  } catch (error) {
+    alert("Erro ao enviar mensagem: " + error.message);
+  }
+};
+
+// Event listener para abrir o chat ao clicar no botão
+document.body.addEventListener("click", (event) => {
+  if (event.target.classList.contains("chat-vendedor")) {
+    const vendedorId = event.target.dataset.vendedorId;
+    abrirChat(vendedorId);
+  }
+});
+
+// Função para carregar produtos por categoria
+const carregarProdutosPorCategoria = async (categoria) => {
+  try {
+    let url;
+
+    
+    if (categoria === "todos") {
+      url = "http://localhost:3000/produtos/todos";
+    } else {
+      url = `http://localhost:3000/produtos/filtrarPorCategoria?categoria=${encodeURIComponent(categoria)}`;
+    }
+
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) throw new Error("Erro ao carregar produtos.");
+
+    const produtos = await response.json();
+    container.innerHTML = ""; // Limpa os anúncios anteriores
+
+    produtos.forEach((produto) => {
+      const anuncio = document.createElement("div");
+      anuncio.className = "anuncio-card";
+      anuncio.innerHTML = `
+       <img src="${produto.primeiraFoto}" alt="${produto.nome}" class="anuncio-img" />
+    <h3 class="anuncio-titulo">${produto.nome}</h3>
+    <p class="condicao ">${produto.condicao}</p>
+    <p class="anuncio-descricao">${produto.descricao}</p>
+    <p class="anuncio-preco">R$ ${parseFloat(produto.preco).toFixed(2)}</p>
+    <p class="reaction-count">
+      Curtidas: <span id="like-count-${produto.id}">${produto.total_likes}</span>,
+      Dislikes: <span id="dislike-count-${produto.id}">${produto.total_dislikes}</span>
+    </p>
+    <div class="anuncio-acoes">
+      <button class="chat-vendedor" data-vendedor-id="${produto.user_id}">
+        <i class="bi bi-chat"></i> Chat com o vendedor
+      </button>
+      <button class="like-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-up"></i>  
+  </button>
+  <button class="dislike-btn" data-product-id="${produto.id}">
+    <i class="bi bi-hand-thumbs-down"></i>
+  </button>
+    </div>
+              `;
+      container.appendChild(anuncio);
+    });
+  } catch (error) {
+    alert("Erro ao carregar produtos: " + error.message);
+  }
+};
+
+// Adiciona evento de clique para cada categoria na barra de navegação
+document.querySelectorAll(".barra-de-navegação-menu li[data-category]").forEach((categoria) => {
+  categoria.addEventListener("click", (event) => {
+    const selectedCategory = event.target.getAttribute("data-category");
+    carregarProdutosPorCategoria(selectedCategory);
+  });
+});
+       
+        dropdown.addEventListener("change", (event) => {
+          const departamentoSelecionado = event.target.value;
+          carregarProdutosFiltrados(departamentoSelecionado);
+        });
+    
+        searchInput.addEventListener("input", (event) => {
+          buscarProdutos(event.target.value);
+        });
+    
+
+        carregarTodosProdutos();
+      });
+    </script>
+    
+    
+    
+  </body>
+</html>
